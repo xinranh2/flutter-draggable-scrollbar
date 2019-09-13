@@ -348,7 +348,7 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
     super.dispose();
   }
 
-  double get barMaxScrollExtent => context.size.height - widget.heightScrollThumb;
+  double get barMaxScrollExtent => context.size.height - widget.heightScrollThumb - widget.padding.vertical;
 
   double get barMinScrollExtent => 0.0;
 
