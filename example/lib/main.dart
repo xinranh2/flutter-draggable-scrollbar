@@ -81,9 +81,12 @@ class SemicircleDemo extends StatelessWidget {
       labelTextBuilder: (offset) {
         final int currentItem = controller.hasClients ? (controller.offset / controller.position.maxScrollExtent * numItems).floor() : 0;
 
-        return Text("$currentItem");
+        return Container(
+          alignment: Alignment.center,
+          constraints: BoxConstraints.tightFor(width: 80.0, height: 30.0),
+          child: Text("$currentItem"),
+        );
       },
-      labelConstraints: BoxConstraints.tightFor(width: 80.0, height: 30.0),
       controller: controller,
       child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -117,7 +120,7 @@ class ArrowsDemo extends StatelessWidget {
       alwaysVisibleScrollThumb: true,
       backgroundColor: Colors.grey[850],
       padding: EdgeInsets.only(right: 4.0),
-      labelTextBuilder: (double offset) => Text("${offset ~/ _itemExtent}", style: TextStyle(color: Colors.white)),
+      labelTextBuilder: (offset) => Text("${offset ~/ _itemExtent}", style: TextStyle(color: Colors.white)),
       controller: controller,
       child: ListView.builder(
         controller: controller,
@@ -209,7 +212,7 @@ class CustomDemo extends StatelessWidget {
         Animation<double> thumbAnimation,
         Animation<double> labelAnimation,
         double height, {
-        Text labelText,
+        Widget labelText,
         BoxConstraints labelConstraints,
       }) {
         return FadeTransition(
