@@ -20,7 +20,7 @@ typedef Text LabelTextBuilder(double offsetY);
 /// for quick navigation of the BoxScrollView.
 class DraggableScrollbar extends StatefulWidget {
   /// The view that will be scrolled with the scroll thumb
-  final BoxScrollView child;
+  final ScrollView child;
 
   /// A function that builds a thumb using the current configuration
   final ScrollThumbBuilder scrollThumbBuilder;
@@ -133,7 +133,7 @@ class DraggableScrollbar extends StatefulWidget {
     @required BoxConstraints labelConstraints,
     @required bool alwaysVisibleScrollThumb,
   }) {
-    var scrollThumbAndLabel = labelText == null
+    final scrollThumbAndLabel = labelText == null
         ? scrollThumb
         : Row(
             mainAxisSize: MainAxisSize.min,
@@ -366,11 +366,10 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
     }
 
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      //print("LayoutBuilder constraints=$constraints");
-
       return NotificationListener<ScrollNotification>(
         onNotification: (ScrollNotification notification) {
           changePosition(notification);
+          return false;
         },
         child: Stack(
           children: <Widget>[
