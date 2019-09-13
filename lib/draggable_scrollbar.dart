@@ -84,8 +84,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.labelTextBuilder,
     this.labelConstraints,
   })  : assert(child.scrollDirection == Axis.vertical),
-        scrollThumbBuilder =
-            _thumbRRectBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
+        scrollThumbBuilder = _thumbRRectBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
         super(key: key);
 
   DraggableScrollbar.arrows({
@@ -102,8 +101,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.labelTextBuilder,
     this.labelConstraints,
   })  : assert(child.scrollDirection == Axis.vertical),
-        scrollThumbBuilder =
-            _thumbArrowBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
+        scrollThumbBuilder = _thumbArrowBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
         super(key: key);
 
   DraggableScrollbar.semicircle({
@@ -120,21 +118,21 @@ class DraggableScrollbar extends StatefulWidget {
     this.labelTextBuilder,
     this.labelConstraints,
   })  : assert(child.scrollDirection == Axis.vertical),
-        scrollThumbBuilder = _thumbSemicircleBuilder(
-            heightScrollThumb * 0.6, scrollThumbKey, alwaysVisibleScrollThumb),
+        scrollThumbBuilder = _thumbSemicircleBuilder(heightScrollThumb * 0.6, scrollThumbKey, alwaysVisibleScrollThumb),
         super(key: key);
 
   @override
   _DraggableScrollbarState createState() => _DraggableScrollbarState();
 
-  static buildScrollThumbAndLabel(
-      {@required Widget scrollThumb,
-      @required Color backgroundColor,
-      @required Animation<double> thumbAnimation,
-      @required Animation<double> labelAnimation,
-      @required Text labelText,
-      @required BoxConstraints labelConstraints,
-      @required bool alwaysVisibleScrollThumb}) {
+  static buildScrollThumbAndLabel({
+    @required Widget scrollThumb,
+    @required Color backgroundColor,
+    @required Animation<double> thumbAnimation,
+    @required Animation<double> labelAnimation,
+    @required Text labelText,
+    @required BoxConstraints labelConstraints,
+    @required bool alwaysVisibleScrollThumb,
+  }) {
     var scrollThumbAndLabel = labelText == null
         ? scrollThumb
         : Row(
@@ -160,8 +158,7 @@ class DraggableScrollbar extends StatefulWidget {
     );
   }
 
-  static ScrollThumbBuilder _thumbSemicircleBuilder(
-      double width, Key scrollThumbKey, bool alwaysVisibleScrollThumb) {
+  static ScrollThumbBuilder _thumbSemicircleBuilder(double width, Key scrollThumbKey, bool alwaysVisibleScrollThumb) {
     return (
       Color backgroundColor,
       Animation<double> thumbAnimation,
@@ -200,8 +197,7 @@ class DraggableScrollbar extends StatefulWidget {
     };
   }
 
-  static ScrollThumbBuilder _thumbArrowBuilder(
-      Key scrollThumbKey, bool alwaysVisibleScrollThumb) {
+  static ScrollThumbBuilder _thumbArrowBuilder(Key scrollThumbKey, bool alwaysVisibleScrollThumb) {
     return (
       Color backgroundColor,
       Animation<double> thumbAnimation,
@@ -236,8 +232,7 @@ class DraggableScrollbar extends StatefulWidget {
     };
   }
 
-  static ScrollThumbBuilder _thumbRRectBuilder(
-      Key scrollThumbKey, bool alwaysVisibleScrollThumb) {
+  static ScrollThumbBuilder _thumbRRectBuilder(Key scrollThumbKey, bool alwaysVisibleScrollThumb) {
     return (
       Color backgroundColor,
       Animation<double> thumbAnimation,
@@ -276,8 +271,7 @@ class ScrollLabel extends StatelessWidget {
   final Text child;
 
   final BoxConstraints constraints;
-  static const BoxConstraints _defaultConstraints =
-      BoxConstraints.tightFor(width: 72.0, height: 28.0);
+  static const BoxConstraints _defaultConstraints = BoxConstraints.tightFor(width: 72.0, height: 28.0);
 
   const ScrollLabel({
     Key key,
@@ -308,8 +302,7 @@ class ScrollLabel extends StatelessWidget {
   }
 }
 
-class _DraggableScrollbarState extends State<DraggableScrollbar>
-    with TickerProviderStateMixin {
+class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProviderStateMixin {
   double _barOffset;
   double _viewOffset;
   bool _isDragInProcess;
@@ -355,8 +348,7 @@ class _DraggableScrollbarState extends State<DraggableScrollbar>
     super.dispose();
   }
 
-  double get barMaxScrollExtent =>
-      context.size.height - widget.heightScrollThumb;
+  double get barMaxScrollExtent => context.size.height - widget.heightScrollThumb;
 
   double get barMinScrollExtent => 0.0;
 
@@ -373,8 +365,7 @@ class _DraggableScrollbarState extends State<DraggableScrollbar>
       );
     }
 
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       //print("LayoutBuilder constraints=$constraints");
 
       return NotificationListener<ScrollNotification>(
@@ -387,24 +378,25 @@ class _DraggableScrollbarState extends State<DraggableScrollbar>
               child: widget.child,
             ),
             RepaintBoundary(
-                child: GestureDetector(
-              onVerticalDragStart: _onVerticalDragStart,
-              onVerticalDragUpdate: _onVerticalDragUpdate,
-              onVerticalDragEnd: _onVerticalDragEnd,
-              child: Container(
-                alignment: Alignment.topRight,
-                margin: EdgeInsets.only(top: _barOffset),
-                padding: widget.padding,
-                child: widget.scrollThumbBuilder(
-                  widget.backgroundColor,
-                  _thumbAnimation,
-                  _labelAnimation,
-                  widget.heightScrollThumb,
-                  labelText: labelText,
-                  labelConstraints: widget.labelConstraints,
+              child: GestureDetector(
+                onVerticalDragStart: _onVerticalDragStart,
+                onVerticalDragUpdate: _onVerticalDragUpdate,
+                onVerticalDragEnd: _onVerticalDragEnd,
+                child: Container(
+                  alignment: Alignment.topRight,
+                  margin: EdgeInsets.only(top: _barOffset),
+                  padding: widget.padding,
+                  child: widget.scrollThumbBuilder(
+                    widget.backgroundColor,
+                    _thumbAnimation,
+                    _labelAnimation,
+                    widget.heightScrollThumb,
+                    labelText: labelText,
+                    labelConstraints: widget.labelConstraints,
+                  ),
                 ),
               ),
-            )),
+            ),
           ],
         ),
       );
@@ -443,8 +435,7 @@ class _DraggableScrollbarState extends State<DraggableScrollbar>
         }
       }
 
-      if (notification is ScrollUpdateNotification ||
-          notification is OverscrollNotification) {
+      if (notification is ScrollUpdateNotification || notification is OverscrollNotification) {
         if (_thumbAnimationController.status != AnimationStatus.forward) {
           _thumbAnimationController.forward();
         }
@@ -498,8 +489,7 @@ class _DraggableScrollbarState extends State<DraggableScrollbar>
           _barOffset = barMaxScrollExtent;
         }
 
-        double viewDelta = getScrollViewDelta(
-            details.delta.dy, barMaxScrollExtent, viewMaxScrollExtent);
+        double viewDelta = getScrollViewDelta(details.delta.dy, barMaxScrollExtent, viewMaxScrollExtent);
 
         _viewOffset = widget.controller.position.pixels + viewDelta;
         if (_viewOffset < widget.controller.position.minScrollExtent) {
@@ -579,8 +569,7 @@ class ArrowClipper extends CustomClipper<Path> {
     path.lineTo(startPointX + arrowWidth / 2, startPointY - arrowWidth / 2);
     path.lineTo(startPointX + arrowWidth, startPointY);
     path.lineTo(startPointX + arrowWidth, startPointY + 1.0);
-    path.lineTo(
-        startPointX + arrowWidth / 2, startPointY - arrowWidth / 2 + 1.0);
+    path.lineTo(startPointX + arrowWidth / 2, startPointY - arrowWidth / 2 + 1.0);
     path.lineTo(startPointX, startPointY + 1.0);
     path.close();
 
@@ -589,8 +578,7 @@ class ArrowClipper extends CustomClipper<Path> {
     path.lineTo(startPointX + arrowWidth / 2, startPointY + arrowWidth / 2);
     path.lineTo(startPointX, startPointY);
     path.lineTo(startPointX, startPointY - 1.0);
-    path.lineTo(
-        startPointX + arrowWidth / 2, startPointY + arrowWidth / 2 - 1.0);
+    path.lineTo(startPointX + arrowWidth / 2, startPointY + arrowWidth / 2 - 1.0);
     path.lineTo(startPointX + arrowWidth, startPointY - 1.0);
     path.close();
 
