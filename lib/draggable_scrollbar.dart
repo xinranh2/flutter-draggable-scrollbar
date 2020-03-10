@@ -279,9 +279,8 @@ class ScrollLabel extends StatelessWidget {
 }
 
 class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProviderStateMixin {
-  double _barOffset;
-  double _viewOffset;
-  bool _isDragInProcess;
+  final ValueNotifier<double> _thumbOffsetNotifier = ValueNotifier(0), _viewOffsetNotifier = ValueNotifier(0);
+  bool _isDragInProcess = false;
 
   AnimationController _thumbAnimationController;
   Animation<double> _thumbAnimation;
@@ -292,9 +291,6 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
   @override
   void initState() {
     super.initState();
-    _barOffset = 0.0;
-    _viewOffset = 0.0;
-    _isDragInProcess = false;
 
     _thumbAnimationController = AnimationController(
       vsync: this,
@@ -325,167 +321,109 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
     super.dispose();
   }
 
-  double get barMaxScrollExtent => context.size.height - widget.heightScrollThumb - (widget.padding?.vertical ?? 0.0);
+  ScrollController get controller => widget.controller;
 
-  double get barMinScrollExtent => 0.0;
+  double get thumbMaxScrollExtent => context.size.height - widget.heightScrollThumb - (widget.padding?.vertical ?? 0.0);
 
-  double get viewMaxScrollExtent => widget.controller.position.maxScrollExtent;
-
-  double get viewMinScrollExtent => widget.controller.position.minScrollExtent;
+  double get thumbMinScrollExtent => 0.0;
 
   @override
   Widget build(BuildContext context) {
-    Widget labelText;
-    if (widget.labelTextBuilder != null && _isDragInProcess) {
-      labelText = widget.labelTextBuilder(
-        _viewOffset + _barOffset + widget.heightScrollThumb / 2,
-      );
-    }
-
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      return NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          changePosition(notification);
-          return false;
-        },
-        child: Stack(
-          children: <Widget>[
-            RepaintBoundary(
-              child: widget.child,
-            ),
-            RepaintBoundary(
-              child: GestureDetector(
-                onVerticalDragStart: _onVerticalDragStart,
-                onVerticalDragUpdate: _onVerticalDragUpdate,
-                onVerticalDragEnd: _onVerticalDragEnd,
-                child: Container(
-                  alignment: Alignment.topRight,
-                  margin: EdgeInsets.only(top: _barOffset),
-                  padding: widget.padding,
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        _onScrollNotification(notification);
+        return false;
+      },
+      child: Stack(
+        children: [
+          RepaintBoundary(
+            child: widget.child,
+          ),
+          RepaintBoundary(
+            child: GestureDetector(
+              onVerticalDragStart: _onVerticalDragStart,
+              onVerticalDragUpdate: _onVerticalDragUpdate,
+              onVerticalDragEnd: _onVerticalDragEnd,
+              child: ValueListenableBuilder(
+                valueListenable: _thumbOffsetNotifier,
+                builder: (context, thumbOffset, child) => Container(
+                  alignment: AlignmentDirectional.topEnd,
+                  padding: EdgeInsets.only(top: thumbOffset) + widget.padding,
                   child: widget.scrollThumbBuilder(
                     widget.backgroundColor,
                     _thumbAnimation,
                     _labelAnimation,
                     widget.heightScrollThumb,
-                    labelText: labelText,
+                    labelText: (widget.labelTextBuilder != null && _isDragInProcess)
+                        ? ValueListenableBuilder(
+                            valueListenable: _viewOffsetNotifier,
+                            builder: (context, viewOffset, child) => widget.labelTextBuilder(viewOffset + thumbOffset),
+                          )
+                        : null,
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      );
-    });
+          ),
+        ],
+      ),
+    );
   }
 
-  //scroll bar has received notification that it's view was scrolled
-  //so it should also changes his position
-  //but only if it isn't dragged
-  changePosition(ScrollNotification notification) {
-    if (_isDragInProcess) {
-      return;
-    }
+  _onScrollNotification(ScrollNotification notification) {
+    _viewOffsetNotifier.value = notification.metrics.pixels;
 
-    setState(() {
+    // we update the thumb position from the scrolled offset
+    // when the user is not dragging the thumb
+    if (!_isDragInProcess) {
       if (notification is ScrollUpdateNotification) {
-        _barOffset += getBarDelta(
-          notification.scrollDelta,
-          barMaxScrollExtent,
-          viewMaxScrollExtent,
-        );
-
-        if (_barOffset < barMinScrollExtent) {
-          _barOffset = barMinScrollExtent;
-        }
-        if (_barOffset > barMaxScrollExtent) {
-          _barOffset = barMaxScrollExtent;
-        }
-
-        _viewOffset += notification.scrollDelta;
-        if (_viewOffset < widget.controller.position.minScrollExtent) {
-          _viewOffset = widget.controller.position.minScrollExtent;
-        }
-        if (_viewOffset > viewMaxScrollExtent) {
-          _viewOffset = viewMaxScrollExtent;
-        }
+        var scrollMetrics = notification.metrics;
+        _thumbOffsetNotifier.value = (scrollMetrics.pixels / scrollMetrics.maxScrollExtent * thumbMaxScrollExtent).clamp(thumbMinScrollExtent, thumbMaxScrollExtent);
       }
 
       if (notification is ScrollUpdateNotification || notification is OverscrollNotification) {
-        if (_thumbAnimationController.status != AnimationStatus.forward) {
-          _thumbAnimationController.forward();
-        }
-
-        _fadeoutTimer?.cancel();
-        _fadeoutTimer = Timer(widget.scrollbarTimeToFade, () {
-          _thumbAnimationController.reverse();
-          _labelAnimationController.reverse();
-          _fadeoutTimer = null;
-        });
+        _showThumb();
+        _scheduleFadeout();
       }
-    });
-  }
-
-  double getBarDelta(
-    double scrollViewDelta,
-    double barMaxScrollExtent,
-    double viewMaxScrollExtent,
-  ) {
-    return scrollViewDelta * barMaxScrollExtent / viewMaxScrollExtent;
-  }
-
-  double getScrollViewDelta(
-    double barDelta,
-    double barMaxScrollExtent,
-    double viewMaxScrollExtent,
-  ) {
-    return barDelta * viewMaxScrollExtent / barMaxScrollExtent;
+    }
   }
 
   void _onVerticalDragStart(DragStartDetails details) {
-    setState(() {
-      _isDragInProcess = true;
-      _labelAnimationController.forward();
-      _fadeoutTimer?.cancel();
-    });
+    _labelAnimationController.forward();
+    _fadeoutTimer?.cancel();
+    setState(() => _isDragInProcess = true);
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
-    setState(() {
-      if (_thumbAnimationController.status != AnimationStatus.forward) {
-        _thumbAnimationController.forward();
-      }
-      if (_isDragInProcess) {
-        _barOffset += details.delta.dy;
+    _showThumb();
+    if (_isDragInProcess) {
+      // thumb offset
+      _thumbOffsetNotifier.value = (_thumbOffsetNotifier.value + details.delta.dy).clamp(thumbMinScrollExtent, thumbMaxScrollExtent);
 
-        if (_barOffset < barMinScrollExtent) {
-          _barOffset = barMinScrollExtent;
-        }
-        if (_barOffset > barMaxScrollExtent) {
-          _barOffset = barMaxScrollExtent;
-        }
-
-        double viewDelta = getScrollViewDelta(details.delta.dy, barMaxScrollExtent, viewMaxScrollExtent);
-
-        _viewOffset = widget.controller.position.pixels + viewDelta;
-        if (_viewOffset < widget.controller.position.minScrollExtent) {
-          _viewOffset = widget.controller.position.minScrollExtent;
-        }
-        if (_viewOffset > viewMaxScrollExtent) {
-          _viewOffset = viewMaxScrollExtent;
-        }
-        widget.controller.jumpTo(_viewOffset);
-      }
-    });
+      // scroll offset
+      final min = controller.position.minScrollExtent;
+      final max = controller.position.maxScrollExtent;
+      controller.jumpTo((_thumbOffsetNotifier.value / thumbMaxScrollExtent * max).clamp(min, max));
+    }
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
+    _scheduleFadeout();
+    setState(() => _isDragInProcess = false);
+  }
+
+  void _showThumb() {
+    if (_thumbAnimationController.status != AnimationStatus.forward) {
+      _thumbAnimationController.forward();
+    }
+  }
+
+  void _scheduleFadeout() {
+    _fadeoutTimer?.cancel();
     _fadeoutTimer = Timer(widget.scrollbarTimeToFade, () {
       _thumbAnimationController.reverse();
       _labelAnimationController.reverse();
       _fadeoutTimer = null;
-    });
-    setState(() {
-      _isDragInProcess = false;
     });
   }
 }
