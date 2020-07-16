@@ -117,9 +117,10 @@ class ArrowsDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollbar.arrows(
-      alwaysVisibleScrollThumb: true,
+      alwaysVisibleScrollThumb: false,
+      visibleScrollLine: true,
       backgroundColor: Colors.grey[850],
-      padding: EdgeInsets.only(right: 4.0),
+      padding: EdgeInsets.only(right: 4.0, top: 10, bottom: 10,),
       labelTextBuilder: (offset) => Text("${offset ~/ _itemExtent}", style: TextStyle(color: Colors.white)),
       controller: controller,
       child: ListView.builder(

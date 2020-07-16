@@ -48,7 +48,7 @@ class DraggableScrollbar extends StatefulWidget {
   /// Determines scrollThumb displaying. If you draw own ScrollThumb and it is true you just don't need to use animation parameters in [scrollThumbBuilder]
   final bool alwaysVisibleScrollThumb;
 
-  final onChange;
+  final bool visibleScrollLine;
 
   DraggableScrollbar({
     Key key,
@@ -62,7 +62,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.scrollbarAnimationDuration = const Duration(milliseconds: 300),
     this.scrollbarTimeToFade = const Duration(milliseconds: 600),
     this.labelTextBuilder,
-    this.onChange,
+    this.visibleScrollLine = false,
   })  : assert(controller != null),
         assert(scrollThumbBuilder != null),
         assert(child.scrollDirection == Axis.vertical),
@@ -80,7 +80,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.scrollbarAnimationDuration = const Duration(milliseconds: 300),
     this.scrollbarTimeToFade = const Duration(milliseconds: 600),
     this.labelTextBuilder,
-    this.onChange,
+    this.visibleScrollLine = false,
   })  : assert(child.scrollDirection == Axis.vertical),
         scrollThumbBuilder = _thumbRRectBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
         super(key: key);
@@ -97,7 +97,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.scrollbarAnimationDuration = const Duration(milliseconds: 300),
     this.scrollbarTimeToFade = const Duration(milliseconds: 600),
     this.labelTextBuilder,
-    this.onChange,
+    this.visibleScrollLine = false,
   })  : assert(child.scrollDirection == Axis.vertical),
         scrollThumbBuilder = _thumbArrowBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
         super(key: key);
@@ -114,7 +114,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.scrollbarAnimationDuration = const Duration(milliseconds: 300),
     this.scrollbarTimeToFade = const Duration(milliseconds: 600),
     this.labelTextBuilder,
-    this.onChange,
+    this.visibleScrollLine = false,
   })  : assert(child.scrollDirection == Axis.vertical),
         scrollThumbBuilder = _thumbSemicircleBuilder(heightScrollThumb * 0.6, scrollThumbKey, alwaysVisibleScrollThumb),
         super(key: key);
@@ -345,6 +345,17 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
           RepaintBoundary(
             child: widget.child,
           ),
+          widget.visibleScrollLine ? RepaintBoundary(
+            child: FadeTransition(
+              opacity: _thumbAnimation,
+              child: Container(
+                alignment: Alignment.topRight,
+                margin: EdgeInsets.only(left: MediaQuery.of(context).size.width-16) + widget.padding,
+                width: 1,
+                color: Colors.black26,
+              ),
+            ),
+          ) : Container(),
           RepaintBoundary(
             child: GestureDetector(
               onVerticalDragStart: _onVerticalDragStart,
@@ -398,7 +409,6 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
     _labelAnimationController.forward();
     _fadeoutTimer?.cancel();
     setState(() => _isDragInProcess = true);
-    widget.onChange(_isDragInProcess);
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
@@ -417,7 +427,6 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
   void _onVerticalDragEnd(DragEndDetails details) {
     _scheduleFadeout();
     setState(() => _isDragInProcess = false);
-    widget.onChange(_isDragInProcess);
   }
 
   void _showThumb() {
