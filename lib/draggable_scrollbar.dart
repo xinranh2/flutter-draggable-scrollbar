@@ -421,8 +421,8 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
   void _showThumb() {
     if (_thumbAnimationController.status != AnimationStatus.forward) {
       _thumbAnimationController.forward();
-      widget.onChange();
     }
+    widget.onChange(_isDragInProcess);
   }
 
   void _scheduleFadeout() {
@@ -432,7 +432,7 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
       _labelAnimationController.reverse();
       _fadeoutTimer = null;
     });
-    widget.onChange();
+    widget.onChange(_isDragInProcess);
   }
 }
 
