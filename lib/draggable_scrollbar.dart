@@ -49,6 +49,7 @@ class DraggableScrollbar extends StatefulWidget {
   final bool alwaysVisibleScrollThumb;
 
   final bool visibleScrollLine;
+  final scrollLineBuilder;
 
   DraggableScrollbar({
     Key key,
@@ -63,6 +64,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.scrollbarTimeToFade = const Duration(milliseconds: 600),
     this.labelTextBuilder,
     this.visibleScrollLine = false,
+    this.scrollLineBuilder,
   })  : assert(controller != null),
         assert(scrollThumbBuilder != null),
         assert(child.scrollDirection == Axis.vertical),
@@ -80,6 +82,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.scrollbarAnimationDuration = const Duration(milliseconds: 300),
     this.scrollbarTimeToFade = const Duration(milliseconds: 600),
     this.labelTextBuilder,
+    this.scrollLineBuilder,
     this.visibleScrollLine = false,
   })  : assert(child.scrollDirection == Axis.vertical),
         scrollThumbBuilder = _thumbRRectBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
@@ -98,6 +101,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.scrollbarTimeToFade = const Duration(milliseconds: 600),
     this.labelTextBuilder,
     this.visibleScrollLine = false,
+    this.scrollLineBuilder,
   })  : assert(child.scrollDirection == Axis.vertical),
         scrollThumbBuilder = _thumbArrowBuilder(scrollThumbKey, alwaysVisibleScrollThumb),
         super(key: key);
@@ -115,6 +119,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.scrollbarTimeToFade = const Duration(milliseconds: 600),
     this.labelTextBuilder,
     this.visibleScrollLine = false,
+    this.scrollLineBuilder,
   })  : assert(child.scrollDirection == Axis.vertical),
         scrollThumbBuilder = _thumbSemicircleBuilder(heightScrollThumb * 0.6, scrollThumbKey, alwaysVisibleScrollThumb),
         super(key: key);
@@ -348,12 +353,13 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
           widget.visibleScrollLine ? RepaintBoundary(
             child: FadeTransition(
               opacity: _thumbAnimation,
-              child: Container(
-                alignment: Alignment.topRight,
-                margin: EdgeInsets.only(left: MediaQuery.of(context).size.width-16) + widget.padding,
-                width: 1,
-                color: Colors.black26,
-              ),
+//              child: Container(
+//                alignment: Alignment.topRight,
+//                margin: EdgeInsets.only(left: MediaQuery.of(context).size.width-16) + widget.padding,
+//                width: 0.7,
+//                color: Colors.black26,
+//              ),
+              child: widget.scrollLineBuilder(widget.padding),
             ),
           ) : Container(),
           RepaintBoundary(

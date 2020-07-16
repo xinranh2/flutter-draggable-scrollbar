@@ -43,22 +43,22 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 1,
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
           bottom: TabBar(tabs: [
-            Tab(text: 'Semicircle'),
+            //Tab(text: 'Semicircle'),
             Tab(text: 'Arrows'),
-            Tab(text: 'RRect'),
-            Tab(text: 'Custom'),
+            //Tab(text: 'RRect'),
+            //Tab(text: 'Custom'),
           ]),
         ),
         body: TabBarView(children: [
-          SemicircleDemo(controller: _semicircleController),
+          //SemicircleDemo(controller: _semicircleController),
           ArrowsDemo(controller: _arrowsController),
-          RRectDemo(controller: _rrectController),
-          CustomDemo(controller: _customController),
+          //RRectDemo(controller: _rrectController),
+          //CustomDemo(controller: _customController),
         ]),
       ),
     );
@@ -143,6 +143,14 @@ class ArrowsDemo extends StatelessWidget {
           );
         },
       ),
+      scrollLineBuilder: (padding) {
+        return Container(
+                alignment: Alignment.topRight,
+                margin: EdgeInsets.only(left: MediaQuery.of(context).size.width-16) + padding,
+                width: 0.7,
+                color: Colors.black26,
+              );
+      },
     );
   }
 }
