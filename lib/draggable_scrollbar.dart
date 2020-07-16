@@ -421,8 +421,8 @@ class _DraggableScrollbarState extends State<DraggableScrollbar> with TickerProv
   void _showThumb() {
     if (_thumbAnimationController.status != AnimationStatus.forward) {
       _thumbAnimationController.forward();
+      widget.onChange(_isDragInProcess);
     }
-    widget.onChange(_isDragInProcess);
   }
 
   void _scheduleFadeout() {
